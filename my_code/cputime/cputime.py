@@ -7,9 +7,9 @@ def parse(param_list):
 	parser = argparse.ArgumentParser()
 	parser.add_argument("pname")
 	parser.add_argument("interval")
-	parser.add_argument("totaltime")
+	parser.add_argument("count")
 	argv = parser.parse_args()
-	s = Sample(argv.pname,int(argv.interval),int(argv.totaltime))
+	s = Sample(argv.pname,int(argv.interval),int(argv.count))
 	return s.run()
 if __name__ == '__main__':
 	if len(sys.argv) > 1:
