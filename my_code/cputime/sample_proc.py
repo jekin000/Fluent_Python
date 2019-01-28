@@ -34,6 +34,15 @@ class Sample(object):
 	>>> f.read()
 	'1.3,0'
 	>>> f.close()
+
+	>>> fcmd.set_return([1.2,1.3,1.4,0.0])
+	>>> s = Sample('uc_detection_va2ddd.py',1,4,fcmd)
+	>>> s.run('a.txt')
+	1.3
+	>>> f = open('a.txt','r')
+	>>> f.read()
+	'1.3,0'
+	>>> f.close()
 	"""	
 	def __init__(self,pname='',interval=0,count=0,cmdobj=Command()):
 		self._pname = pname
@@ -55,10 +64,11 @@ class Sample(object):
 	def run(self,fname=None):
 		while self._cnt > 0: 
 			self._sdata.append(self.sample_once())
-			self._cnt = self._cnt - self._intr
+			self._cnt = self._cnt - 1
 			time.sleep(self._intr)
 			self._save_data(fname,'{},{}'.format(self._sdata,self._cnt))
 			
+		self._sdata = [x for x in self._sdata if x > 0.0]
 		aver = reduce(lambda x,y:x+y,self._sdata)
 		self._save_data(fname,'{},{}'.format(aver/len(self._sdata),self._cnt))
 		return aver/len(self._sdata)
