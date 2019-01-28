@@ -10,22 +10,39 @@ import subprocess
 class Command(object):
 	'''
 	>>> cmd = Command()
-	>>> type(cmd.cputime('uc_detection_va2ddd.py'))
+	>>> type(cmd.cputime('python'))
 	<type 'float'>
+	>>> print(cmd.exword)
+	cputime\|grep
 	'''
 
 	def __init__(self):
+		self._exword = ''
 		pass
-	def cputime(self,pname):
+	def cputime(self,pname,exword=['cputime']):
+		self._exword = ''
+		exword.append('grep')
+		for w in exword:
+			if len(self._exword) == 0: 
+				self._exword = w
+			else:
+				self._exword = self._exword+'\|'+w
+
 		proc1 = subprocess.Popen(['ps','aux'], stdout=subprocess.PIPE)
 		proc2 = subprocess.Popen(['grep',pname], stdin=proc1.stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-		proc3 = subprocess.Popen(['awk','-F',' ','{print $3}'], stdin=proc2.stdout,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		proc3 = subprocess.Popen(['grep','-v',self._exword], stdin=proc2.stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+		# $3 is cputime $11 is process name
+		proc4 = subprocess.Popen(['awk','-F',' ','{print $3}'], stdin=proc3.stdout,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		proc1.stdout.close() # Allow proc1 to receive a SIGPIPE if proc2 exits.	
 		proc2.stdout.close()
-            	(stdout, stderr) = proc3.communicate()
+		proc3.stdout.close()
+            	(stdout, stderr) = proc4.communicate()
 		retstr = stdout.split('\n')[0]
 		return float(retstr)
+	@property
+	def exword(self):
+		return str(self._exword)
 
 class FakeCommand(Command):
 	'''
