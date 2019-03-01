@@ -19,6 +19,22 @@ class Command(object):
 	def __init__(self):
 		self._exword = ''
 		pass
+        def runcmd(self,cmdlist): 
+            proclist = []
+            preStdOut = None
+            for cmd in cmdlist:
+                if len(proclist) == 0:
+		    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                else:
+                    proc = subprocess.Popen(cmd, stdin=proclist[-1].stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                proclist.append(proc)
+
+            for idx in range(0,len(proclist)-1):
+                proclist[idx].stdout.close()
+
+            (stdout,stderr) = proclist[-1].communicate()
+            return stdout
+
 	def cputime(self,pname,exword=['cputime']):
 		self._exword = ''
 		exword.append('grep')

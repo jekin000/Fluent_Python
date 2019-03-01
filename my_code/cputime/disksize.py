@@ -8,18 +8,18 @@ import time
 class Test(object):
     def Test01(self):
         """
-        >>> d = DiskSize('/sys/firmware','m',4)
+        >>> d = DiskSize('boot','m',4)
         >>> d.sample()
-        3993
-        >>> d = UsedDisk('/sys/firmware','m')
+        813
+        >>> d = UsedDisk('run','m',['lock','shm','user'])
         >>> d.sample()
-        0
+        2
         """
 
 class Sample(object):
     def __init__(self,sleeptime):
         self._sleeptime = sleeptime
-        self._disk = UsedDisk('/var/app_data','m','VM_ramdisk')
+        self._disk = UsedDisk('/var/app_data','m',['VM_ramdisk','ram_mails'])
     def run(self):
         oldsize = 0
         samplelist = []
@@ -43,23 +43,30 @@ class Sample(object):
 
 
 class DiskSize(object):
-    def __init__(self,partname,unit,idx,skipstr=None):
+    def __init__(self,partname,unit,idx,skiplist=[]):
         self._unitstr = '-' + unit
         self._idx = idx
         self._partname = partname
         self._cmd = Command()
-        self._skipstr = skipstr
+        self._skiplist = skiplist
     def sample(self):
-        if self._skipstr is None: 
+        if len(self._skiplist) == 0: 
             return int(self._cmd.runcmd([['df',self._unitstr],['grep',self._partname],['awk','-F',' ','{print $%d}'%self._idx]]))
         else:
-            return int(self._cmd.runcmd([['df',self._unitstr]
-                ,['grep',self._partname]
-                ,['grep','-v',self._skipstr]
-                ,['awk','-F',' ','{print $%d}'%self._idx]]))
+            greplist = [] 
+            for s in self._skiplist:
+                greplist.append(['grep','-v',s])
+
+            cmdlist = []
+            cmdlist.append(['df',self._unitstr])
+            cmdlist.append(['grep',self._partname])
+            cmdlist.extend(greplist)
+            cmdlist.append(['awk','-F',' ','{print $%d}'%self._idx])
+
+            return int(self._cmd.runcmd(cmdlist))
 
 class UsedDisk(DiskSize):
-    def __init__(self,partname,unit,skipstr=None):
+    def __init__(self,partname,unit,skipstr=[]):
         super(UsedDisk,self).__init__(partname,unit,3,skipstr)
 
 if __name__ == "__main__":
