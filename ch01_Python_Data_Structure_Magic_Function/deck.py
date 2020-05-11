@@ -1,5 +1,24 @@
 ##########################################
 # 1.1 The deck by __getitem__, __len__
+## collections.nametuple, only property,no method's object
+## for use __getitem__,__len__, the FrenchDeck get benefit like
+### 1. could use  python standard method, such as len,
+### 2. could use  python standard module, such as random.choice
+### 3. list[12::13] = get list[12] then get a item for per interval 13
+## other note: #doctest: +ELLIPSIS
+## key:
+### 0. dunder method
+### 1. collections.nametuple
+### 2. __getitem__, __len__
+### 3. random.choice
+### 5. list[12::13]
+### 6. #doctest: +ELLIPSIS
+### 7. reversed, sorted
+### 8. in, e.g. Card('Q','hearts') in deck
+### 9. order
+## note:
+### FrenchDeck can not  Shuffle(change order), because it is fixed order & no __setitem__
+
 ##########################################
 
 import collections
